@@ -1,0 +1,6 @@
+opencv-python
+numpy
+torch
+matplotlib
+pillow
+# segment-anything is not on PyPI; user must install it manually or from source 
