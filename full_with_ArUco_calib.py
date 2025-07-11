@@ -10,35 +10,42 @@ from datetime import datetime
 import subprocess
 
 os.chdir("C:/Users/Seifo/Documents/Stage ete 2025")
+
+
 #x 36.5 42.3 y 41.3 
-input_path =""
-output_path =""
-blur_amount = 0
-real_distance = 10.0
+#input_path =""
+#output_path =""
+#blur_amount = 0
+#real_distance = 10.0
 
 
-def select_ruler_points_with_matplotlib(image_path):
-    img = mpimg.imread(image_path)
-    fig, ax = plt.subplots()
-    ax.imshow(img)
-    ax.set_title('Zoom/pan, then click two points (close window when done)')
-    clicked_points = []
-    def onclick(event):
-        if hasattr(fig.canvas, 'toolbar') and fig.canvas.toolbar is not None:
-            if fig.canvas.toolbar.mode != '':
-                return
-        if event.inaxes != ax:
-            return
-        if len(clicked_points) < 2:
-            x, y = int(event.xdata), int(event.ydata)
-            clicked_points.append((x, y))
-            ax.plot(x, y, 'go')
-            fig.canvas.draw()
-        if len(clicked_points) == 2:
-            plt.close(fig)
-    cid = fig.canvas.mpl_connect('button_press_event', onclick)
-    plt.show()
-    return clicked_points if len(clicked_points) == 2 else None
+def arUco_camera_calib_distance(real_marker_size_mm,image):
+    # Estimate pose of each detected marker
+    markerLength = real_marker_size_mm  # mm
+    camera_matrix = [[1000, 0, 320], [0, 1000, 240], [0, 0, 1]]
+    dist_coeffs = [0, 0, 0, 0, 0]  # No distortion
+    camera_matrix = np.array(camera_matrix, dtype=np.float32)
+    dist_coeffs = np.array(dist_coeffs, dtype=np.float32)
+
+    
+    # Detect ArUco markers
+    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+    parameters = cv2.aruco.DetectorParameters()
+    detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
+    corners, ids, _ = detector.detectMarkers(image)
+
+
+
+    rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(
+        corners, markerLength, camera_matrix, dist_coeffs
+    )
+
+    z_values = [tvec[0][2] for tvec in tvecs]
+    mean_z = np.mean(z_values)
+    
+    return mean_z
+
+
 
 def ArUco_calib():
     image_path = "arucoTests/test5.jpg"  # Make sure this file exists!
@@ -64,7 +71,7 @@ def ArUco_calib():
     id_to_corners = {id_: corners[i][0] for i, id_ in enumerate(ids.flatten())}
 
 
-# Take CORNER 0 (top-left corner of each marker) for alignment
+# Marker corners for alignment
     src_pts = np.array([
     id_to_corners[0][3],  # top-left marker, its corner 
     id_to_corners[2][0],  # top-right marker, 
@@ -72,7 +79,7 @@ def ArUco_calib():
     id_to_corners[1][2],  # bottom-left marker, 
 ], dtype=np.float32)
 
-# ---- Define the destination rectangle ----
+
 # Here we'll make the output a cropped fronto-parallel rect
     width = int(max(
     np.linalg.norm(src_pts[1] - src_pts[0]),
@@ -99,15 +106,12 @@ def ArUco_calib():
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-
-
-
 # marker_corners: list of 4x2 arrays for each marker (after warping)
     real_marker_size_mm = 30.0
     x_dists = []
     y_dists = []
 
-# Example: your marker IDs are 0, 2, 1, 3 (in any order you want)
+# marker IDs are 0, 2, 1, 3
     marker_ids = [0, 2, 1, 3]
 
 # id_to_corners: {id: 4x2 array}
@@ -125,30 +129,42 @@ def ArUco_calib():
     avg_x = np.mean(x_dists)
     avg_y = np.mean(y_dists)
 
+    
+
+    avg_z = arUco_camera_calib_distance(real_marker_size_mm,image)
     x_scale = real_marker_size_mm / avg_x
     y_scale = real_marker_size_mm / avg_y
-    T =[x_scale,y_scale,warped]
-    print(f"X scale: {x_scale} mm/pixel, Y scale: {y_scale} mm/pixel")
+    T =[x_scale,y_scale,warped,avg_z]
+    print(f"X scale: {x_scale} mm/pixel, Y scale: {y_scale} mm/pixel, Avg Z: {avg_z} mm")
+
+
+
     return T
 
 def detect_and_segment():
-    real_distance_mm = 10.0
     T  = ArUco_calib()
+
     image = T[2]
-    cv2.imshow("Warped", T[2])
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
     if image is None:
         raise FileNotFoundError("Image not found.")
     clone = image.copy()
     
+    #Taking into account the piece height
+    piece_height = 22 #mm    #comeback here to change the height of the piece
+    mean_z = T[3]  # mm
     
     height,width,_ = image.shape
     dim = [ width * T[0] , height*T[1]]
+    def correct_dimension(measured_size, piece_height, mean_z):
+        return measured_size * (mean_z - piece_height) / mean_z 
+    dim[0] = correct_dimension(dim[0], piece_height, mean_z)
+    dim[1] = correct_dimension(dim[1], piece_height, mean_z)
     print("height :",height)
     print("width :",width)
-    print("width scaled",dim[0])
-    print("height scaled",dim[1])
+    print("width scaled :",dim[0])
+    print("height scaled :",dim[1])
+
+    
 
 
     sam_checkpoint = "sam_vit_b_01ec64.pth"
@@ -168,10 +184,10 @@ def detect_and_segment():
         if event == cv2.EVENT_LBUTTONDOWN and len(clicked) < 1:
             clicked.append((x, y))
             cv2.circle(image_bgr, (x, y), 5, (0, 0, 255), -1)
-            cv2.imshow("Click on the background", image_bgr)
+            cv2.imshow("Click on the Object", image_bgr)
 
-    cv2.imshow("Click on the background", image_bgr)
-    cv2.setMouseCallback("Click on the background", click_callback)
+    cv2.imshow("Click on the Object", image_bgr)
+    cv2.setMouseCallback("Click on the Object", click_callback)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
