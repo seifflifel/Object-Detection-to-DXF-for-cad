@@ -11,7 +11,8 @@ import subprocess
 
 os.chdir("C:/Users/Seifo/Documents/Stage ete 2025")
 
-
+#z  22.27 # mm  
+# distance 130mm
 #x 36.5 42.3 y 41.3 
 #input_path =""
 #output_path =""
@@ -48,7 +49,7 @@ def arUco_camera_calib_distance(real_marker_size_mm,image):
 
 
 def ArUco_calib():
-    image_path = "arucoTests/test5.jpg"  # Make sure this file exists!
+    image_path = "New Tests/side.jpeg"  # Make sure this file exists!
     image = cv2.imread(image_path)
     if image is None:
         raise FileNotFoundError(f"Image not found: {image_path}")
@@ -131,7 +132,7 @@ def ArUco_calib():
 
     
 
-    avg_z = arUco_camera_calib_distance(real_marker_size_mm,image)
+    avg_z = 130 #arUco_camera_calib_distance(real_marker_size_mm,image)
     x_scale = real_marker_size_mm / avg_x
     y_scale = real_marker_size_mm / avg_y
     T =[x_scale,y_scale,warped,avg_z]
@@ -150,7 +151,7 @@ def detect_and_segment():
     clone = image.copy()
     
     #Taking into account the piece height
-    piece_height = 22 #mm    #comeback here to change the height of the piece
+    piece_height = 37 #mm    #comeback here to change the height of the piece
     mean_z = T[3]  # mm
     
     height,width,_ = image.shape
@@ -213,89 +214,19 @@ def detect_and_segment():
 
     return dim
 
-def extract_contour():
-    mask = cv2.imread('mask.png', cv2.IMREAD_GRAYSCALE)
-    inverted_mask = mask
-    contours, _ = cv2.findContours(inverted_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    h, w = mask.shape
-    transparent_image = np.zeros((h, w, 4), dtype=np.uint8)
-    for contour in contours:
-        cv2.drawContours(transparent_image, [contour], -1, color=(0, 0, 0, 255), thickness=2)
-    cv2.imwrite('contour_transparent_black.png', transparent_image)
+    #def save_image():
+    #    nonlocal iteration_counter
+    #    blurred_alpha = apply_blur(blur_kernel)
+    #    rgba_image = make_rgba_from_alpha(blurred_alpha)
+    #    date_str = datetime.now().strftime("%Y-%m-%d")
+    #    filename = f"contour_{date_str}_{iteration_counter:02d}.png"
+    #    cv2.imwrite(filename, rgba_image)
+    #    iteration_counter += 1
 
 
-def smooth_contour():
-    mask = cv2.imread('mask.png', cv2.IMREAD_GRAYSCALE)
-    inverted_mask = mask
-    contours, _ = cv2.findContours(inverted_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    h, w = mask.shape
-    alpha_mask = np.zeros((h, w), dtype=np.uint8)
-    cv2.drawContours(alpha_mask, contours, -1, color=255, thickness=2)
-
-    def make_rgba_from_alpha(alpha):
-        rgba = np.zeros((h, w, 4), dtype=np.uint8)
-        rgba[:, :, 0:3] = 255
-        rgba[:, :, 3] = alpha
-        return rgba
-
-    blur_kernel = 1
-    iteration_counter = 1
-    preview_window = 'Feathered Contour'
-
-    def apply_blur(k):
-        if k < 1:
-            k = 1
-        if k % 2 == 0:
-            k += 1
-        blurred_alpha = cv2.GaussianBlur(alpha_mask, (k, k), 0)
-        return blurred_alpha
-
-    def update(val):
-        nonlocal blur_kernel
-        blur_kernel = cv2.getTrackbarPos('Blur Size', preview_window)
-        blurred_alpha = apply_blur(blur_kernel)
-        preview = cv2.merge([blurred_alpha]*3)
-        cv2.imshow(preview_window, preview)
-
-    def save_image():
-        nonlocal iteration_counter
-        blurred_alpha = apply_blur(blur_kernel)
-        rgba_image = make_rgba_from_alpha(blurred_alpha)
-        date_str = datetime.now().strftime("%Y-%m-%d")
-        filename = f"contour_{date_str}_{iteration_counter:02d}.png"
-        cv2.imwrite(filename, rgba_image)
-        iteration_counter += 1
-
-    cv2.namedWindow(preview_window)
-    cv2.createTrackbar('Blur Size', preview_window, 1, 50, update)
-    update(1)
-
-    while True:
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('s'):
-            save_image()
-        elif key == ord('q') or key == 27:
-            break
-    cv2.destroyAllWindows()
-
-def stack_image():
-    img = cv2.imread('contour_transparent_black.png', cv2.IMREAD_UNCHANGED)
-    if img is None:
-        raise ValueError('Could not load image! Check the path.')
-    b, g, r, a = cv2.split(img)
-    alpha_float = a.astype(np.float32) / 255.0
-    stack_count = 20
-    accum_alpha = alpha_float * stack_count
-    accum_alpha = np.clip(accum_alpha, 0, 1.0)
-    new_alpha = (accum_alpha * 255).astype(np.uint8)
-    result = cv2.merge([255*np.ones_like(new_alpha),
-                        255*np.ones_like(new_alpha),
-                        255*np.ones_like(new_alpha),
-                        new_alpha])
-    cv2.imwrite('contour_stacked_white.png', result)
 
 def invert_image():
-    image = Image.open("contour_stacked_white.png")
+    image = Image.open("mask.png")
     if image.mode != "RGBA":
         image = image.convert("RGBA")
     data = np.array(image)
@@ -321,7 +252,7 @@ def convert_to_bmp():
 
 def vectorize_with_potrace(dim):
     input_bmp = "black_contour_whitebg_pillow_conversion.bmp"
-    output_dxf = "test5.dxf"
+    output_dxf = "side.dxf"
     
     potrace_cmd = [
         r"C:\\Users\\Seifo\\Documents\\Stage ete 2025\\potrace-1.16.win64\\potrace.exe",
@@ -346,9 +277,6 @@ def vectorize_with_potrace(dim):
 
 def main():
     dim = detect_and_segment()
-    extract_contour()
-    smooth_contour()
-    stack_image()
     invert_image()
     convert_to_bmp()
     vectorize_with_potrace(dim)
