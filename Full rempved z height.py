@@ -12,7 +12,7 @@ import subprocess
 os.chdir("C:/Users/Seifo/Documents/Stage ete 2025")
 
 #z  22.27 # mm  
-# distance 130mm
+# distance 130mm    205 + 3.48
 #x 36.5 42.3 y 41.3 
 #input_path =""
 #output_path =""
@@ -23,9 +23,14 @@ os.chdir("C:/Users/Seifo/Documents/Stage ete 2025")
 def arUco_camera_calib_distance(real_marker_size_mm,image):
     # Estimate pose of each detected marker
     markerLength = real_marker_size_mm  # mm
-    camera_matrix = [[1000, 0, 320], [0, 1000, 240], [0, 0, 1]]
+    camera_matrix = np.array([
+    [3024,    0, 2016],
+    [   0, 3024, 1512],
+    [   0,    0,    1]
+], dtype=np.float32)
+    
     dist_coeffs = [0, 0, 0, 0, 0]  # No distortion
-    camera_matrix = np.array(camera_matrix, dtype=np.float32)
+    
     dist_coeffs = np.array(dist_coeffs, dtype=np.float32)
 
     
@@ -49,11 +54,35 @@ def arUco_camera_calib_distance(real_marker_size_mm,image):
 
 
 def ArUco_calib():
-    image_path = "New Tests/last.jpg"  # Make sure this file exists!
+
+    #cap = cv2.VideoCapture(1)  # 0 is usually the default webcam
+    #if not cap.isOpened():
+    #    raise IOError("Cannot open webcam")
+#
+    #print("Press 'c' to capture an image or 'q' to quit")
+#
+    #while True:
+    #    ret, frame = cap.read()
+    #    if not ret:
+    #        continue
+#
+    #    cv2.imshow("Live Feed - Press 'c' to capture", frame)
+#
+    #    key = cv2.waitKey(1)
+    #    if key == ord('c'):  # capture
+    #        image = frame.copy()
+    #        break
+    #    elif key == ord('q'):  # quit
+    #        cap.release()
+    #        cv2.destroyAllWindows()
+    #        exit()
+#
+    #cap.release()
+    #cv2.destroyAllWindows()
+    image_path = "New Tests/c.jpg"  # Make sure this file exists! test3.jpg
     image = cv2.imread(image_path)
-    
     if image is None:
-        raise FileNotFoundError(f"Image not found: {image_path}")
+        raise FileNotFoundError("Image not found.")
 
 # Detect ArUco markers
     aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
@@ -63,7 +92,10 @@ def ArUco_calib():
 
 # Draw detected markers for visual check
     debug_img = cv2.aruco.drawDetectedMarkers(image.copy(), corners, ids)
+    cv2.namedWindow('Detected Markers', cv2.WINDOW_NORMAL)
     cv2.imshow('Detected Markers', debug_img)
+    cv2.resizeWindow('Detected Markers', 1920, 1080)
+
     cv2.waitKey(0)
 
 # ---- Define YOUR specific IDs in YOUR order ----
@@ -132,8 +164,8 @@ def ArUco_calib():
     avg_y = np.mean(y_dists)
 
     
-
-    avg_z = 130 #arUco_camera_calib_distance(real_marker_size_mm,image)
+    #130 mm
+    avg_z = arUco_camera_calib_distance(real_marker_size_mm,image)
     x_scale = real_marker_size_mm / avg_x
     y_scale = real_marker_size_mm / avg_y
     T =[x_scale,y_scale,warped,avg_z]
@@ -152,13 +184,13 @@ def detect_and_segment():
     clone = image.copy()
     
     #Taking into account the piece height
-    piece_height = 22.27 #mm    #comeback here to change the height of the piece
+    piece_height = 0 #mm    #comeback here to change the height of the piece
     mean_z = T[3]  # mm
     
     height,width,_ = image.shape
     dim = [ width * T[0] , height*T[1]]
     def correct_dimension(measured_size, piece_height, mean_z):
-        return measured_size * (mean_z - piece_height) / mean_z 
+        return measured_size 
     dim[0] = correct_dimension(dim[0], piece_height, mean_z)
     dim[1] = correct_dimension(dim[1], piece_height, mean_z)
     print("height :",height)
@@ -193,10 +225,17 @@ def detect_and_segment():
         if event == cv2.EVENT_LBUTTONDOWN and len(clicked) < 1:
             clicked.append((x, y))
             cv2.circle(image_bgr, (x, y), 5, (0, 0, 255), -1)
+            cv2.namedWindow('Click on the Object', cv2.WINDOW_NORMAL)
             cv2.imshow("Click on the Object", image_bgr)
+            cv2.resizeWindow('Click on the Object', 1920, 1080)
+            
 
+
+    cv2.namedWindow('Click on the Object', cv2.WINDOW_NORMAL)
     cv2.imshow("Click on the Object", image_bgr)
+    cv2.resizeWindow('Click on the Object', 1920, 1080)
     cv2.setMouseCallback("Click on the Object", click_callback)
+
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
@@ -218,7 +257,9 @@ def detect_and_segment():
     best_mask = masks[np.argmax(scores)]
     mask_display = image_rgb.copy()
     mask_display[best_mask] = (0, 255, 0)
+    cv2.namedWindow("Segmented Object", cv2.WINDOW_NORMAL)
     cv2.imshow("Segmented Object", cv2.cvtColor(mask_display, cv2.COLOR_RGB2BGR))
+    cv2.resizeWindow("Segmented Object", 1920, 1080)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     cv2.imwrite("mask.png", best_mask.astype(np.uint8) * 255)
