@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <DirectoryRef Id="INSTALLFOLDER" />
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="AddInComRegGroup">
+            <Component Id="cmpF81DECA97A814DAB4AB48703902C7FB0" Directory="INSTALLFOLDER" Guid="*">
+                <Class Id="{4A1E4A4C-E0F3-498D-8BCA-4A51B21DDFE0}" Context="InprocServer32" Description="TestAddin.TestAddin" ThreadingModel="both" ForeignServer="mscoree.dll">
+                    <ProgId Id="TestAddin.TestAddin" Description="TestAddin.TestAddin" />
+                </Class>
+                <Class Id="{E792AC8E-1703-3A38-9803-747885CEF32D}" Context="InprocServer32" Description="TestAddin.PropretyPageHandler" ThreadingModel="both" ForeignServer="mscoree.dll">
+                    <ProgId Id="TestAddin.PropretyPageHandler" Description="TestAddin.PropretyPageHandler" />
+                </Class>
+                <File Id="filAD60FB8DE11B440477C4E1076FE75401" KeyPath="yes" Source="$(var.SourceOutDir)\TestAddin.dll" />
+                <RegistryValue Root="HKCR" Key="CLSID\{4A1E4A4C-E0F3-498D-8BCA-4A51B21DDFE0}\Implemented Categories\{62C8FE65-4EBB-45e7-B440-6E39B2CDBF29}" Value="" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{4A1E4A4C-E0F3-498D-8BCA-4A51B21DDFE0}\InprocServer32\1.0.0.0" Name="Class" Value="TestAddin.TestAddin" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{4A1E4A4C-E0F3-498D-8BCA-4A51B21DDFE0}\InprocServer32\1.0.0.0" Name="Assembly" Value="TestAddin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{4A1E4A4C-E0F3-498D-8BCA-4A51B21DDFE0}\InprocServer32\1.0.0.0" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{4A1E4A4C-E0F3-498D-8BCA-4A51B21DDFE0}\InprocServer32\1.0.0.0" Name="CodeBase" Value="file:///[#filAD60FB8DE11B440477C4E1076FE75401]" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{4A1E4A4C-E0F3-498D-8BCA-4A51B21DDFE0}\InprocServer32" Name="Class" Value="TestAddin.TestAddin" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{4A1E4A4C-E0F3-498D-8BCA-4A51B21DDFE0}\InprocServer32" Name="Assembly" Value="TestAddin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{4A1E4A4C-E0F3-498D-8BCA-4A51B21DDFE0}\InprocServer32" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{4A1E4A4C-E0F3-498D-8BCA-4A51B21DDFE0}\InprocServer32" Name="CodeBase" Value="file:///[#filAD60FB8DE11B440477C4E1076FE75401]" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{E792AC8E-1703-3A38-9803-747885CEF32D}\Implemented Categories\{62C8FE65-4EBB-45e7-B440-6E39B2CDBF29}" Value="" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{E792AC8E-1703-3A38-9803-747885CEF32D}\InprocServer32\1.0.0.0" Name="Class" Value="TestAddin.PropretyPageHandler" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{E792AC8E-1703-3A38-9803-747885CEF32D}\InprocServer32\1.0.0.0" Name="Assembly" Value="TestAddin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{E792AC8E-1703-3A38-9803-747885CEF32D}\InprocServer32\1.0.0.0" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{E792AC8E-1703-3A38-9803-747885CEF32D}\InprocServer32\1.0.0.0" Name="CodeBase" Value="file:///[#filAD60FB8DE11B440477C4E1076FE75401]" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{E792AC8E-1703-3A38-9803-747885CEF32D}\InprocServer32" Name="Class" Value="TestAddin.PropretyPageHandler" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{E792AC8E-1703-3A38-9803-747885CEF32D}\InprocServer32" Name="Assembly" Value="TestAddin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{E792AC8E-1703-3A38-9803-747885CEF32D}\InprocServer32" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="CLSID\{E792AC8E-1703-3A38-9803-747885CEF32D}\InprocServer32" Name="CodeBase" Value="file:///[#filAD60FB8DE11B440477C4E1076FE75401]" Type="string" Action="write" />
+            </Component>
+        </ComponentGroup>
+    </Fragment>
+</Wix>

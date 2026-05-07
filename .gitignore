@@ -1,0 +1,51 @@
+# OS and editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+venv/
+.venv/
+env/
+ENV/
+
+# C# / Visual Studio
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.cache
+*.log
+
+
+# Keep source folders and bundled assets tracked, including tcl/
+
+
+MobileSAM/*
+!MobileSAM/.gitkeep 
+
+
+potrace-1.16.win64/*
+!potrace-1.16.win64/.gitkeep 
+
+scrcpy-win64-v3.3.1/*
+!scrcpy-win64-v3.3.1/.gitkeep
+
+*.pt
+
+python-3.13.0-amd64.exe

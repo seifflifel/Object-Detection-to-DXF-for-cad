@@ -1,0 +1,8 @@
+numpy
+opencv_contrib_python
+opencv_python
+Pillow
+pywin32
+torch
+timm
+tk
