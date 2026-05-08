@@ -1,18 +1,12 @@
 # FastFlow
 
 FastFlow is a complete capture-to-CAD system that turns a phone-captured object into production-ready CAD geometry in minutes instead of hours.
-
-It combines a transparent acrylic rig with precision ArUco markers, a Python computer-vision pipeline (ArUco calibration, MobileSAM segmentation, Potrace vectorization), and a native SolidWorks add-in to automate the entire workflow from acquiring the image to creating a fully dimensioned part.
-
-**Why it matters:** Instead of manually tracing contours, checking scale repeatedly, and switching between tools, FastFlow keeps the entire workflow connected and automated. The system achieves ~0.3 mm measurement accuracy and reduces operator friction at every step.
-
-## What FastFlow Does
-
-FastFlow solves a practical engineering problem: converting the contour of a real object into CAD geometry quickly, reliably, and with as little repetitive operator work as possible.
+And it solves a practical engineering problem: converting the contour of a real object into CAD geometry quickly, reliably, and with as little repetitive operator work as possible.
 
 It started from a simple observation: real workshop and prototyping tasks often need a physical shape turned into CAD geometry, but that step is slow and sensitive to user skill. Manual tracing is tedious, edge-detection approaches are fragile, and pure software tools rarely fit cleanly into the CAD workflow.
 
-The project is designed around a complete capture-to-CAD chain. The phone captures the object over an ArUco reference plane inside a transparent acrylic rig. The mirrored screen is then processed in Python for marker-based calibration, object segmentation with MobileSAM, mask preparation, and vectorization to DXF with Potrace. On the CAD side, the SolidWorks add-in takes over and applies downstream operations directly inside the part or assembly environment.
+The project is designed around a complete capture-to-CAD chain. 
+The phone captures the object over an ArUco reference plane inside a transparent acrylic rig. The mirrored screen is then processed in Python for marker-based calibration, object segmentation with MobileSAM, mask preparation, and vectorization to DXF with Potrace. On the CAD side, the SolidWorks add-in takes over and applies downstream operations directly inside the part or assembly environment.
 
 That design choice matters because the goal is not only to generate a contour, but to reduce friction in the actual engineering workflow.
 
@@ -25,8 +19,62 @@ The system combines a physical capture rig and a software pipeline:
 
 The result is a workflow that feels like a single tool instead of several disconnected scripts.
 
+**Why it matters:** Instead of manually tracing contours, checking scale repeatedly, and switching between tools, FastFlow keeps the entire workflow connected and automated. The system achieves ~0.3 mm measurement accuracy and reduces operator friction at every step.
+
+## Getting Started
+
+### Prerequisites
+
+- Windows machine with SolidWorks installed (Solidworks FRENCH VERSION)
+- Android phone for scrcpy capture
+- Python environment for the vision pipeline
+- The rig files and add-in files from the repository
+
+## First Time Setup
+> **⚠️ IMPORTANT:** All files must be extracted and placed in `C:/CP files`. The Python pipeline and add-in configuration depend on this exact path structure.
+
+Follow these steps in order:
+
+1. **Extract all files** to `C:/CP files`
+
+2. **Download external dependencies** MobileSAM, Potrace, scrcpy, etc.
 
 
+3. **Install the Python environment**
+   - Run `Automatic_python_installer.bat`  
+
+4. **Install the SolidWorks Add-in**
+   - Navigate to `C:\CP files\Addin_Installer\`
+   - Run `setup.exe`
+   - Follow the installer wizard to completion
+
+5. **Prepare your Android phone**
+   - Open Settings → Developer Options
+   - Enable **USB Debugging**
+   - Enable **Developer Options** (may require tapping Build Number 7 times first)
+   - Connect the phone to your workstation via USB
+
+6. **Activate the add-in in SolidWorks**
+   - Open SolidWorks
+   - Go to **Tools → Add-ins**
+   - Check the boxes for:
+     - **AutoTrace**
+     - **FastFlow InspireTech**
+   - Click **OK**
+
+7. **You're ready to use FastFlow**
+   - Place your phone in the rig
+   - Open SolidWorks and click `Run Python` to begin
+
+### Make it work
+
+1. Place the phone in the rig.
+2. Start the mirrored capture with scrcpy.
+3. Open SolidWorks and load the FastFlow add-in.
+4. Click `Run Python`.
+5. Select the mirrored window and click on the object.
+6. Review the segmentation result and retry if needed.
+7. Insert the image, scale it, and continue with the CAD commands.
 
 ## System Overview
 
@@ -68,8 +116,6 @@ The rig is important because the rest of the pipeline depends on consistent geom
 - Supports the enclosure workflow with lock, sensor, and cover components.
 
 ## Workflow Diagram
-
-The workflow diagram below is pasted exactly as used in the report structure, without modification.
 
 ```text
 ┌───────────────────┐     Click      ┌───────────────────┐     Detects 4     ┌───────────────────┐
@@ -298,61 +344,6 @@ FastFlow works best when the capture conditions are controlled.
 
 These limits do not break the workflow, but they define where the next improvements should focus.
 
-## Getting Started
-
-### Prerequisites
-
-- Windows machine with SolidWorks installed (Solidworks FRENCH VERSION)
-- Android phone for scrcpy capture
-- Python environment for the vision pipeline
-- The rig files and add-in files from the repository
-
-## First Time Setup
-> **⚠️ IMPORTANT:** All files must be extracted and placed in `C:/CP files`. The Python pipeline and add-in configuration depend on this exact path structure.
-
-Follow these steps in order:
-
-1. **Extract all files** to `C:/CP files`
-
-2. **Download external dependencies** MobileSAM, Potrace, scrcpy, etc.
-
-
-3. **Install the Python environment**
-   - Run `Automatic_python_installer.bat`  
-   - 
-
-4. **Install the SolidWorks Add-in**
-   - Navigate to `C:\CP files\Addin_Installer\`
-   - Run `setup.exe`
-   - Follow the installer wizard to completion
-
-5. **Prepare your Android phone**
-   - Open Settings → Developer Options
-   - Enable **USB Debugging**
-   - Enable **Developer Options** (may require tapping Build Number 7 times first)
-   - Connect the phone to your workstation via USB
-
-6. **Activate the add-in in SolidWorks**
-   - Open SolidWorks
-   - Go to **Tools → Add-ins**
-   - Check the boxes for:
-     - **AutoTrace**
-     - **FastFlow InspireTech**
-   - Click **OK**
-
-7. **You're ready to use FastFlow**
-   - Place your phone in the rig
-   - Open SolidWorks and click `Run Python` to begin
-
-### Make it work
-
-1. Place the phone in the rig.
-2. Start the mirrored capture with scrcpy.
-3. Open SolidWorks and load the FastFlow add-in.
-4. Click `Run Python`.
-5. Select the mirrored window and click on the object.
-6. Review the segmentation result and retry if needed.
-7. Insert the image, scale it, and continue with the CAD commands.
 
 ## Project Structure
 
